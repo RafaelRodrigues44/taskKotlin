@@ -45,33 +45,51 @@ class MainActivity : AppCompatActivity() {
         popupTitulo.show()
     }
 
+    private fun showConfirmationDialog(titulo: String, descricao: String, status: String) {
+        val popupConfirmacao = AlertDialog.Builder(this)
+
+        popupConfirmacao.setTitle("Confirmação")
+        popupConfirmacao.setMessage("Título: $titulo\nDescrição: $descricao\nStatus: $status")
+
+        popupConfirmacao.setPositiveButton("Ok") { dialog, which ->
+            createTask(titulo, descricao, status)
+        }
+        popupConfirmacao.setNegativeButton("Cancelar") { dialog, which ->
+            dialog.cancel()
+        }
+        popupConfirmacao.show()
+    }
+
+
     private fun showDescriptionDialog(titulo: String) {
         val popupDescricao = AlertDialog.Builder(this)
         val textDescricao = EditText(this)
+        val options = arrayOf("Pendente", "Concluída")
 
         popupDescricao.setTitle("Descrição")
         popupDescricao.setView(textDescricao)
-        popupDescricao.setPositiveButton("Ok") { dialog, which ->
-            val descricao = textDescricao.text.toString()
-            if (descricao.isNotEmpty()) {
-                createTask(titulo, descricao)
-            } else {
-                Toast.makeText(this, "Por favor, insira uma descrição", Toast.LENGTH_SHORT).show()
-            }
+
+        // Adicionando o dropdown ao AlertDialog
+        popupDescricao.setSingleChoiceItems(options, -1) { dialog, which ->
+            // which é a posição do item selecionado no dropdown
+            val status = options[which]
+            dialog.dismiss() // Fechar o AlertDialog após seleção
+            showConfirmationDialog(titulo, textDescricao.text.toString(), status)
         }
+
         popupDescricao.setNegativeButton("Cancelar") { dialog, which ->
             dialog.cancel()
         }
         popupDescricao.show()
     }
-
-    private fun createTask(titulo: String, descricao: String) {
-        val task = Task(titulo, descricao)
+    private fun createTask(titulo: String, descricao: String, status: String) {
+        val task = Task(titulo, descricao, status)
         tasks.add(task)
 
         Snackbar.make(binding.fab, task.toString(), Snackbar.LENGTH_LONG)
             .setAction("Action", null).show()
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
